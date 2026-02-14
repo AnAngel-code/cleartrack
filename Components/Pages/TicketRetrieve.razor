@@ -282,18 +282,18 @@ else
         {
             using var context = await DbFactory.CreateDbContextAsync();
 
-            
+
             var dbTicket = await context.Tickets
                 .Include(t => t.History)
                 .FirstOrDefaultAsync(t => t.Id == ticket.Id);
 
             if (dbTicket != null)
             {
-                
+
                 context.Tickets.Remove(dbTicket);
                 await context.SaveChangesAsync();
 
-                
+
                 saveMessage = $"Ticket #{ticket.Id} has been permanently deleted.";
                 ticket = null;
                 retrieved = false;
