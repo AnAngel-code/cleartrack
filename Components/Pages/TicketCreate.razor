@@ -1,0 +1,122 @@
+﻿@page "/create"
+@using TicketSystem.Data
+@using TicketSystem.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+<style>
+    .create-card {
+        border: 2px solid #dee2e6;
+        border-radius: 25px; 
+        padding: 30px;
+        background-color: #f8f9fa;
+        max-width: 600px;
+        margin: auto;
+    }
+</style>
+
+<h3 class="page-title"><u>Create New Ticket</u></h3>
+
+<div class="container mt-4">
+    @if (!showSuccess)
+    {
+        <div class="create-card shadow-sm">
+            <EditForm Model="newTicket" OnValidSubmit="HandleCreate">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                <div class="mb-3">
+                    <label class="fw-bold">Subject / Title</label>
+                    <InputText @bind-Value="newTicket.Title" class="form-control" placeholder="Briefly describe the issue" />
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col">
+                        <label class="fw-bold">Category</label>
+                        <InputSelect @bind-Value="newTicket.Category" class="form-control">
+                            <option value="">-- Select Category --</option>
+                            <option value="Operations">Operations</option>
+                            <option value="Sales">Sales</option>
+                            <option value="Secondary">Secondary</option>
+                            <option value="Systems">Systems</option>
+                        </InputSelect>
+                    </div>
+                    <div class="col">
+                        <label class="fw-bold">Initial Status</label>
+                        <InputSelect @bind-Value="newTicket.Status" class="form-control" disabled>
+                            <option value="Open">Open</option>
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="fw-bold">Description</label>
+                    <InputTextArea @bind-Value="newTicket.Description" class="form-control" rows="4" />
+                </div>
+
+                <button type="submit" class="btn btn-success w-100 fw-bold">Submit Ticket</button>
+            </EditForm>
+        </div>
+    }
+    else
+    {        
+        <div class="create-card text-center shadow">
+            <div class="mb-3">
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+            </div>
+            <h2 class="text-success">Success!</h2>
+            <p class="lead">Ticket <strong>#@lastCreatedId</strong> has been created.</p>
+
+            <hr class="my-4" />
+
+            <p>Would you like to create another ticket?</p>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <button class="btn btn-primary btn-lg px-4 gap-3" @onclick="ResetForm">
+                    Yes, Create Another
+                </button>
+                <a href="/" class="btn btn-outline-secondary btn-lg px-4">
+                    No thanks.
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private Ticket newTicket = new() { Status = "Open" };
+    private bool showSuccess = false;
+    private int lastCreatedId;
+
+    private async Task HandleCreate()
+    {
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+                        
+            newTicket.CreatedAt = DateTime.UtcNow;
+
+            context.Tickets.Add(newTicket);
+            await context.SaveChangesAsync();
+            
+            lastCreatedId = newTicket.Id;
+            showSuccess = true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error: {ex.Message}");
+        }
+    }
+
+    private void ResetForm()
+    {        
+        newTicket = new Ticket { Status = "Open" };
+        
+        showSuccess = false;
+        
+        lastCreatedId = 0;
+    }
+}

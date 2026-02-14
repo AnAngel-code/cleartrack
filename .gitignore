@@ -1,0 +1,17 @@
+﻿# Visual Studio
+.vs/
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.dll
+
+# Blazor / build
+wwwroot/lib/
+node_modules/
+
+# SQLite
+*.db
+*.db-shm
+*.db-wal

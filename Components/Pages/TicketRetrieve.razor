@@ -1,0 +1,322 @@
+﻿@page "/retrieve"
+
+@using TicketSystem.Data
+@using TicketSystem.Models
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthProvider
+
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+<style>
+    .ticket-details-container {
+        border: 2px solid #dee2e6;
+        border-radius: 25px;
+        padding: 20px;
+        background-color: #f8f9fa;
+        margin-bottom: 20px;
+    }
+
+    .short-dashed-line {
+        border: 0;
+        border-top: 1px dashed #bbb;
+        width: 30%;
+        margin: 15px auto;
+    }
+
+    
+    .danger-zone {
+        border: 1px solid #f5c2c7;
+        background-color: #fff8f8;
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 30px;
+    }
+</style>
+
+<h3 class="page-title"><u>Find a Ticket</u></h3>
+
+@if (!showSuccess)
+{
+
+    <div class="ticket-card" style="max-width: 600px;">
+
+        
+        <div class="form-group">
+            <label class="fw-bold">Ticket ID</label>
+            <div class="d-flex gap-2">
+                <InputNumber @bind-Value="searchId" class="form-control" placeholder="ID#" />
+                <button type="button" class="btn btn-success" @onclick="LoadTicket">Ok</button>
+            </div>
+        </div>
+
+        @if (retrieved)
+        {
+            @if (ticket == null)
+            {
+                <div class="alert alert-warning mt-3">Ticket not found.</div>
+            }
+            else
+            {
+                <hr />
+
+                <div class="ticket-details-container">
+                    <h4 class="text-decoration-underline" style="color: black;">@ticket.Title</h4>
+
+                    <div class="row mt-3">
+                        <div class="col-sm-6">
+                            <strong>Status:</strong> <span class="badge bg-info text-dark">@ticket.Status</span>
+                        </div>
+                        <div class="col-sm-6">
+                            <strong>Category:</strong> @ticket.Category
+                        </div>
+                    </div>
+
+                    <div class="mt-3">
+                        <strong>Description:</strong>
+                        <p class="text-muted mb-0">@ticket.Description</p>
+                    </div>
+                </div>
+
+                
+                <h5 class="mt-4 fw-bold text-center">History</h5>
+                <div class="history-list px-2">
+                    @if (ticket.History?.Any() == true)
+                    {
+                        var sortedHistory = ticket.History.OrderByDescending(h => h.CreatedAt).ToList();
+                        @for (int i = 0; i < sortedHistory.Count; i++)
+                        {
+                            var h = sortedHistory[i];
+                            <div class="history-entry">
+                                <div class="d-flex justify-content-between">
+                                    <strong>@h.Status</strong>
+                                    <small class="text-muted">@h.CreatedAt.ToLocalTime().ToString("g")</small>
+                                </div>
+                                <div class="text-secondary">@h.Note</div>
+                            </div>
+                            @if (i < sortedHistory.Count - 1)
+                            {
+                                <div class="short-dashed-line"></div>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <div class="text-muted fst-italic text-center">No history entries yet.</div>
+                    }
+                </div>
+
+                <hr />
+
+                
+                <div class="p-3 border rounded shadow-sm bg-white">
+                    <h5 class="fw-bold">Update Ticket</h5>
+                    <div class="form-group mt-2">
+                        <label>Change Status</label>
+                        <InputSelect @bind-Value="ticket.Status" class="form-control">
+                            <option value="Open">Open</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Closed">Closed</option>
+                        </InputSelect>
+                    </div>
+
+                    <div class="form-group mt-2">
+                        <label>Add Internal Note</label>
+                        <InputTextArea @bind-Value="newNote" class="form-control" rows="3" />
+                    </div>
+
+                    <button class="btn btn-primary mt-3 w-100" @onclick="SaveUpdate">Save Changes</button>
+                </div>
+
+                
+                <AuthorizeView Roles="Admin">
+                    <Authorized>
+                        <div class="danger-zone">
+                            @if (!confirmDelete)
+                            {
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="text-danger fw-bold">Administrative Actions</span>
+                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => confirmDelete = true">
+                                        Delete Ticket
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-center">
+                                    <p class="text-danger fw-bold">
+                                        Are you sure you want to delete Ticket #@ticket.Id and all of its history?
+                                    </p>
+                                    <div class="d-flex justify-content-center gap-2">
+                                        <button class="btn btn-danger" @onclick="HandleDelete">Yes, Delete Everything</button>
+                                        <button class="btn btn-secondary" @onclick="() => confirmDelete = false">Cancel</button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                    </Authorized>
+                </AuthorizeView>
+
+
+
+                @if (!string.IsNullOrWhiteSpace(saveMessage))
+                {
+                    <div class="alert alert-info mt-3 py-2">@saveMessage</div>
+                }
+            }
+        }
+    </div>
+}
+else
+{
+    
+    <div class="create-card text-center shadow">
+        <div class="mb-3">
+            @if (saveMessage.Contains("deleted"))
+            {
+                <i class="bi bi-trash text-danger" style="font-size: 3rem;"></i>
+                <h2 class="text-danger">Deleted!</h2>
+            }
+            else
+            {
+                <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                <h2 class="text-success">Success!</h2>
+            }
+        </div>
+        
+
+        <hr class="my-4" />
+
+        <p>Would you like to find another ticket?</p>
+        <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+            <button class="btn btn-primary btn-lg px-4 gap-3" @onclick="ResetForm">
+                Yes, Find Another
+            </button>
+            <a href="/" class="btn btn-outline-secondary btn-lg px-4">
+                No thanks.
+            </a>
+        </div>
+    </div>
+}
+
+@code {
+    private int? searchId;
+    private Ticket? ticket;
+    private bool retrieved = false;
+    private string? newNote;
+    private string? saveMessage;
+    private bool showSuccess = false;    
+    private bool confirmDelete = false;
+
+    private async Task LoadTicket()
+    {
+        saveMessage = "";
+        retrieved = true;
+        confirmDelete = false; 
+
+        using var context = await DbFactory.CreateDbContextAsync();
+        ticket = await context.Tickets
+            .Include(t => t.History)
+            .FirstOrDefaultAsync(t => t.Id == searchId);
+    }
+
+    private async Task SaveUpdate()
+    {
+        if (ticket == null) return;
+
+        showSuccess = true;
+
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+            var dbTicket = await context.Tickets.FirstOrDefaultAsync(t => t.Id == ticket.Id);
+
+            if (dbTicket != null)
+            {
+                dbTicket.Status = ticket.Status;
+
+                if (!string.IsNullOrWhiteSpace(newNote))
+                {
+                    var authState = await AuthProvider.GetAuthenticationStateAsync();
+                    var userName = authState.User.Identity?.Name ?? "User";
+
+                    var history = new TicketHistory
+                    {
+                        TicketId = dbTicket.Id,
+                        Status = dbTicket.Status,
+                        Category = dbTicket.Category,
+                        Note = newNote,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = userName
+                    };
+                    context.TicketHistories.Add(history);
+                }
+
+                await context.SaveChangesAsync();
+
+                ticket = await context.Tickets
+                    .Include(t => t.History)
+                    .FirstOrDefaultAsync(t => t.Id == ticket.Id);
+
+                newNote = string.Empty;
+                saveMessage = "Update Successful!";
+            }
+        }
+        catch (Exception ex)
+        {
+            Exception realError = ex;
+            while (realError.InnerException != null) realError = realError.InnerException;
+            saveMessage = $"Database Error: {realError.Message}";
+        }
+    }
+
+    private async Task HandleDelete()
+    {
+        if (ticket == null) return;
+
+        try
+        {
+            using var context = await DbFactory.CreateDbContextAsync();
+
+            
+            var dbTicket = await context.Tickets
+                .Include(t => t.History)
+                .FirstOrDefaultAsync(t => t.Id == ticket.Id);
+
+            if (dbTicket != null)
+            {
+                
+                context.Tickets.Remove(dbTicket);
+                await context.SaveChangesAsync();
+
+                
+                saveMessage = $"Ticket #{ticket.Id} has been permanently deleted.";
+                ticket = null;
+                retrieved = false;
+                searchId = null;
+                confirmDelete = false;
+
+                showSuccess = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            saveMessage = "Error deleting ticket: " + ex.Message;
+        }
+    }
+
+    public void ResetForm()
+    {
+        showSuccess = false;
+        ticket = null;
+        searchId = null;
+        retrieved = false;
+        confirmDelete = false;
+        newNote = string.Empty;
+        saveMessage = string.Empty;
+    }
+}

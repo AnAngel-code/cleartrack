@@ -1,0 +1,19 @@
+﻿@page "/test-click"
+@rendermode InteractiveServer
+
+
+
+<h3>Test Click</h3>
+
+<button type="button" @onclick="ClickMe">Click Me</button>
+<p>@message</p>
+
+@code {
+    private string message = "Not clicked yet";
+
+    private void ClickMe()
+    {
+        message = "Clicked!";
+    }
+}
+

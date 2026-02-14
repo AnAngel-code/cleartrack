@@ -1,0 +1,127 @@
+@import url('/Icons/bootstrap-icons/font/bootstrap-icons.css');
+
+body {
+    background-color: #ffffff; /* Or #fcfcfc for a very light gray */
+    background-image: none !important; /* This kills the bottom-right rainbow */
+}
+
+
+/* ===========================
+   Ticket Card – Gray + Navy
+   =========================== */
+
+.ticket-card {
+    position: relative;
+    background: linear-gradient(145deg, #f2f4f7, #e5e7eb);
+    color: #0b2a4a;
+    padding: 2.5rem 2rem 2.5rem 3rem;
+    margin: 2rem auto;
+    max-width: 900px;
+    border-radius: 14px;
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18), 0 10px 30px rgba(0, 0, 0, 0.12);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .ticket-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.22), 0 18px 40px rgba(0, 0, 0, 0.16);
+    }
+
+    /* Navy accent stripe */
+    .ticket-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0.75rem;
+        height: 100%;
+        background: linear-gradient(to bottom, #0b2a4a, #1f4b7a);
+        border-radius: 0 8px 8px 0;
+    }
+
+    /* Heading */
+    .ticket-card h3 {
+        margin-bottom: 2rem;
+        text-align: center;
+        color: #0b2a4a;
+        letter-spacing: 0.5px;
+    }
+
+/* ===========================
+   Form Elements
+   =========================== */
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+}
+
+/* Inputs */
+.form-control {
+    border-radius: 8px;
+    padding: 0.55rem;
+    background-color: #ffffff;
+    color: #0b2a4a;
+    border: 1px solid #cbd5e1;
+}
+
+    .form-control:focus {
+        outline: none;
+        border-color: #1f4b7a;
+        box-shadow: 0 0 0 3px rgba(31, 75, 122, 0.25);
+    }
+
+/* ===========================
+   Actions
+   =========================== */
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1.75rem;
+}
+
+/* Submit Button */
+.btn-primary {
+    background-color: #0b2a4a;
+    color: #ffffff;
+    border: none;
+    padding: 0.65rem 1.4rem;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
+}
+
+    .btn-primary:hover {
+        background-color: #1f4b7a;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+    }
+
+.nav-link .bi {
+    color: white;
+    font-size: 1.2em;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+.bi {
+    font-family: "bootstrap-icons" !important;
+    font-style: normal;
+    font-weight: normal;
+    line-height: 1;
+}
+
+
+
