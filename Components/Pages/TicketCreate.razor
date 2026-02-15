@@ -11,6 +11,7 @@
 <style>
     .create-card {
         border: 2px solid #dee2e6;
+
         border-radius: 25px; 
         padding: 30px;
         background-color: #f8f9fa;
@@ -63,7 +64,7 @@
         </div>
     }
     else
-    {        
+    {
         <div class="create-card text-center shadow">
             <div class="mb-3">
                 <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
@@ -96,12 +97,12 @@
         try
         {
             using var context = await DbFactory.CreateDbContextAsync();
-                        
+
             newTicket.CreatedAt = DateTime.UtcNow;
 
             context.Tickets.Add(newTicket);
             await context.SaveChangesAsync();
-            
+
             lastCreatedId = newTicket.Id;
             showSuccess = true;
         }
@@ -112,11 +113,13 @@
     }
 
     private void ResetForm()
+
     {        
         newTicket = new Ticket { Status = "Open" };
         
-        showSuccess = false;
-        
+        showSuccess = false;   
+
         lastCreatedId = 0;
     }
+    
 }

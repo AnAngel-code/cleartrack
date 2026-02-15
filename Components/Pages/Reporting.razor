@@ -15,7 +15,7 @@
 <h3 class="page-title"><u>Support Ticket Report</u></h3>
 
 <div class="card p-3 shadow-sm" style="border-radius: 20px;">
-    
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h5 class="mb-0">All Tickets</h5>
         <button class="btn btn-outline-success shadow-sm" @onclick="ExportToExcel">
@@ -60,7 +60,7 @@
                 <Template Context="ticket">
                     @ticket.CreatedAt?.ToLocalTime().ToString("d")
                 </Template>
-                
+
                 <FilterTemplate>
                     <RadzenDatePicker @bind-Value="@filterDate"
                                       DateFormat="d"
@@ -77,8 +77,10 @@
 </div>
 
 @code {
+
     private List<Ticket>? tickets; 
     private DateTime? filterDate;  
+
 
     private List<Ticket> DisplayedTickets => tickets?
     .Where(t => !filterDate.HasValue ||

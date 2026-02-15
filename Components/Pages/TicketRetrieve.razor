@@ -27,7 +27,7 @@
         margin: 15px auto;
     }
 
-    
+
     .danger-zone {
         border: 1px solid #f5c2c7;
         background-color: #fff8f8;
@@ -43,8 +43,6 @@
 {
 
     <div class="ticket-card" style="max-width: 600px;">
-
-        
         <div class="form-group">
             <label class="fw-bold">Ticket ID</label>
             <div class="d-flex gap-2">
@@ -81,7 +79,6 @@
                     </div>
                 </div>
 
-                
                 <h5 class="mt-4 fw-bold text-center">History</h5>
                 <div class="history-list px-2">
                     @if (ticket.History?.Any() == true)
@@ -111,7 +108,7 @@
 
                 <hr />
 
-                
+
                 <div class="p-3 border rounded shadow-sm bg-white">
                     <h5 class="fw-bold">Update Ticket</h5>
                     <div class="form-group mt-2">
@@ -131,7 +128,7 @@
                     <button class="btn btn-primary mt-3 w-100" @onclick="SaveUpdate">Save Changes</button>
                 </div>
 
-                
+
                 <AuthorizeView Roles="Admin">
                     <Authorized>
                         <div class="danger-zone">
@@ -173,7 +170,6 @@
 }
 else
 {
-    
     <div class="create-card text-center shadow">
         <div class="mb-3">
             @if (saveMessage.Contains("deleted"))
@@ -187,7 +183,6 @@ else
                 <h2 class="text-success">Success!</h2>
             }
         </div>
-        
 
         <hr class="my-4" />
 
@@ -209,6 +204,7 @@ else
     private bool retrieved = false;
     private string? newNote;
     private string? saveMessage;
+
     private bool showSuccess = false;    
     private bool confirmDelete = false;
 
@@ -216,7 +212,6 @@ else
     {
         saveMessage = "";
         retrieved = true;
-        confirmDelete = false; 
 
         using var context = await DbFactory.CreateDbContextAsync();
         ticket = await context.Tickets
@@ -293,7 +288,9 @@ else
                 context.Tickets.Remove(dbTicket);
                 await context.SaveChangesAsync();
 
-
+                context.Tickets.Remove(dbTicket);
+                await context.SaveChangesAsync();
+                
                 saveMessage = $"Ticket #{ticket.Id} has been permanently deleted.";
                 ticket = null;
                 retrieved = false;

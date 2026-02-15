@@ -7,7 +7,6 @@ using TicketSystem.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -51,12 +50,12 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+
 app.UseAntiforgery(); 
 
 app.MapRazorComponents<App>()
    .AddInteractiveServerRenderMode();
 app.MapAdditionalIdentityEndpoints();
-
 
 using (var scope = app.Services.CreateScope())
 {

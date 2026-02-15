@@ -5,8 +5,10 @@
 
 <style>
     .hero-section {
+
         background-color: #f8f9fa; 
         border: 2px solid #dee2e6; 
+
         border-radius: 25px;
         padding: 40px;
         margin-bottom: 30px;
@@ -51,14 +53,14 @@
 
 <div class="container animate-fadeIn">
 
-    
+
     <div class="hero-section shadow-sm text-center">
         <h1 class="display-5 fw-bold" style="color: black; text-decoration: underline;">Ticket Management System</h1>
         <p class="lead text-muted">A robust, secure platform for tracking support requests and system history.</p>
         <div class="badge bg-dark px-3 py-2">Capstone Project v1.0</div>
     </div>
 
-    
+
     <div class="row mb-5 text-center">
         <div class="col-md-4 mb-3">
             <div class="stat-card p-3 shadow-sm">
@@ -80,7 +82,7 @@
         </div>
     </div>
 
-    
+
     <div class="row g-4 text-center">
         <div class="col-md-6">
             <a href="/create" class="action-card shadow-sm">
@@ -97,7 +99,7 @@
             </a>
         </div>
     </div>
-    
+
     <div class="mt-5 p-4 text-center border-top">
         <small class="text-muted">Built with: .NET 8.0 • Blazor Interactive Server • Entity Framework Core • SQLite</small>
     </div>
@@ -114,7 +116,7 @@
         {
             using var context = await DbFactory.CreateDbContextAsync();
 
-            // Get live counts from SQLite
+            
             openCount = await context.Tickets.CountAsync(t => t.Status == "Open");
             progressCount = await context.Tickets.CountAsync(t => t.Status == "In Progress");
             closedCount = await context.Tickets.CountAsync(t => t.Status == "Closed");
