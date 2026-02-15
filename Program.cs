@@ -10,9 +10,20 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-    options.UseSqlite(connectionString));
+//builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+//    options.UseSqlite(connectionString));
 
+//options.UseNpgsql(connectionString));
+
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
+{
+    if (builder.Environment.IsDevelopment())
+        options.UseSqlite(connectionString);
+    else
+        options.UseNpgsql(connectionString);
+
+});
+   
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
 
@@ -59,8 +70,12 @@ app.MapAdditionalIdentityEndpoints();
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-    await SeedData.Initialize(services);
+    var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+    
+    await using var db = await factory.CreateDbContextAsync();
+    db.Database.Migrate();
+
+    await SeedData.Initialize(scope.ServiceProvider);
 }
 
 app.Run();
