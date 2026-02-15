@@ -10,6 +10,19 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
+var safe = connectionString;
+if (!string.IsNullOrWhiteSpace(safe))
+{
+    // mask password
+    safe = System.Text.RegularExpressions.Regex.Replace(
+        safe,
+        @"(?i)(password\s*=\s*)[^;]+",
+        "$1***"
+    );
+}
+Console.WriteLine("DefaultConnection being used: " + safe);
+
+
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     if (builder.Environment.IsDevelopment())
