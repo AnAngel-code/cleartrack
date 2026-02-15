@@ -38,8 +38,14 @@ builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
         options.UseSqlite(sqliteConn);
     else
     {
-        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL")
-            ?? throw new InvalidOperationException("DATABASE_URL not found in environment.");
+        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+        
+        Console.WriteLine($"DATABASE_URL present? {(!string.IsNullOrWhiteSpace(databaseUrl))}, length={(databaseUrl?.Length ?? 0)}");
+        if (string.IsNullOrWhiteSpace(databaseUrl))
+            throw new InvalidOperationException("DATABASE_URL not found in environment.");
+
+        //var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL")
+        //    ?? throw new InvalidOperationException("DATABASE_URL not found in environment.");
 
         var npgsqlConn = BuildNpgsqlConnectionStringFromDatabaseUrl(databaseUrl);
         options.UseNpgsql(npgsqlConn);
