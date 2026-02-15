@@ -15,12 +15,35 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 //options.UseNpgsql(connectionString));
 
+static string BuildNpgsqlConnectionStringFromDatabaseUrl(string databaseUrl)
+{
+    var uri = new Uri(databaseUrl);
+
+    var userInfo = uri.UserInfo.Split(':', 2);
+    var username = Uri.UnescapeDataString(userInfo[0]);
+    var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
+
+    var database = uri.AbsolutePath.TrimStart('/');
+    
+    return $"Host={uri.Host};Port={uri.Port};Database={database};Username={username};Password={password};SSL Mode=Disable";
+}
+
+
+var sqliteConn = builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     if (builder.Environment.IsDevelopment())
-        options.UseSqlite(connectionString);
+        options.UseSqlite(sqliteConn);
     else
-        options.UseNpgsql(connectionString);
+    {
+        var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL")
+            ?? throw new InvalidOperationException("DATABASE_URL not found in environment.");
+
+        var npgsqlConn = BuildNpgsqlConnectionStringFromDatabaseUrl(databaseUrl);
+        options.UseNpgsql(npgsqlConn);
+    }     
 
 });
    
