@@ -7,20 +7,26 @@ using TicketSystem.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+//?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
+
+var connectionString =
+    Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+    ?? builder.Configuration.GetConnectionString("DefaultConnection")
+    ?? throw new InvalidOperationException("No DefaultConnection found.");
+
+Console.WriteLine("ENV ConnectionStrings__DefaultConnection present? " + (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection"))));
+Console.WriteLine("Using connection starts with: " + (connectionString?.Split(';')[0] ?? "<null>"));
 
 builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
 {
     if (builder.Environment.IsDevelopment())
     {
-        options.UseSqlite(connectionString);
-        Console.WriteLine("In Dev");
+        options.UseSqlite(connectionString);        
     }        
     else
     {        
-        options.UseNpgsql(connectionString);
-        Console.WriteLine("In Prod");
+        options.UseNpgsql(connectionString);        
     }     
 
 });
